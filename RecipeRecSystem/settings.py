@@ -31,13 +31,16 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'databaseManager.apps.DatabasemanagerConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    #local apps
+    'databaseManager.apps.DatabasemanagerConfig',
+    'pages.apps.PagesConfig'
 ]
 
 MIDDLEWARE = [
