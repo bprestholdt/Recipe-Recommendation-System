@@ -1,0 +1,21 @@
+.flowing-rainbow {
+    font-weight: bold;
+    text-decoration: underline;
+    background: linear-gradient(45deg, red, orange, yellow, green, cyan, blue, violet);
+    background-size: 400% 400%;
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    animation: flowingGradient 10s ease infinite;
+}
+
+@keyframes flowingGradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
