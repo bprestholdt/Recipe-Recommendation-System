@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from databaseManager.models import Recipe
 from databaseManager.forms import RecipeForm
+import requests
+import json
 
 #list of example recipes to be displayed at bottom of home page- could change/add more detail in future
 recipes = [
@@ -27,16 +29,55 @@ recipes = [
 
 # Create your views here.
 
-#example function to be integrated w gpt
+#function to generate a recipe using chatGPT
 def generate_recipe_chatGPT(ingredients):
-    # call api or gpt function here
-    # placeholder returns example recipe
-    return {
-        'author': 'Generated Author',
-        'title': 'Generated Recipe',
-        'ingredients': ingredients,
-        'date_posted': 'Today'
+    # ChatGPT API endpoint
+    api_endpoint = 'https://api.openapi.com/v1/completions'
+
+    # Provide OpenAI API key
+    api_key = 'sk-proj-gMhE1JpO8HsUAB32TSCeT3BlbkFJ4kSrObVWHekv9TpdiAp8'
+
+    # Request headers
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {api_key}',
     }
+
+    # Request data
+    data = {
+        'model': 'text-davinci-003', # check what model 
+        'prompt': f'Generate a recipe using the following ingredients: {ingredients}',
+        'max_tokens':100, # adjust
+    }
+
+    try:
+        # make POST request to chatGPT API
+        response = requests.post(api_endpoint, headers=headers, data=json.dumps(data))
+
+        # Check if request was successful
+        if response.status_code == 200:
+            # Extract generated recipe from response
+            generated_recipe = response.json()['choices'][0]['text']
+
+            # return generated recipe
+            return {
+            'author': 'Generated Author',
+            'title': 'Generated Recipe',
+            'description': generated_recipe
+            'ingredients': ingredients,
+            'date_posted': 'Today'
+        }
+        else:
+            # If request failed, return error message
+            return {
+                'error': 'Failed to generate recipe. Please try again later.'
+            }
+    except Exception as e:
+        # If an exception occurs, return error message
+        return {
+            'error': str(e)
+        }
+
 #function to save recipe to user account in postgreSQL database
 def save_recipe(title, description, ingredients, author):
     recipe = Recipe(
