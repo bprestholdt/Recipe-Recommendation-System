@@ -21,7 +21,7 @@
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container">
-        <a class="navbar-brand" href="{% url 'RRS-home' %}">Recipe Recommendation System</a>
+        <a class="navbar-brand" href="{% url 'home' %}">Recipe Recommendation System</a>
         <button
           class="navbar-toggler"
           type="button"
@@ -39,19 +39,33 @@
               <a
                 class="nav-link"
                 aria-current="page"
-                href="{% url 'RRS-home' %}"
+                href="{% url 'home' %}"
                 >Browse User Recipes</a
               >
             </li>
             <li class="nav-item">
               <a
                 class="nav-link"
-                href="{% url 'RRS-home' %}"
+                href="{% url 'home' %}"
                 >My Generated Recipes</a
               >
             </li>
           </ul>
         </div>
+        <ul class="navbar-nav">
+          {% if user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link" href="#">Welcome, {{ user.username }}</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'login' %}">Login</a>
+            </li>
+          {% endif %}
+        </ul>
       </div>
     </nav>
     <div class="container mt-4 col-8">{% block content %} {% endblock %}</div>

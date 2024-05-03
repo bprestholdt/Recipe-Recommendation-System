@@ -17,11 +17,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.contrib.auth import views as auth_views
+from pages.views import registration_view, home, logout_view
 
 urlpatterns = [
-    path("", include("pages.urls")),
-    path("", include("databaseManager.urls")),
-    path('admin/', admin.site.urls),
+    path("", home, name="home"),  # Home page
+    path("registration/", registration_view, name="registration"),  # Registration page
+    path("login/", auth_views.LoginView.as_view(), name="login"),  # Login page
+    path('logout/', logout_view, name='logout'),
+    path('admin/', admin.site.urls),  # Django admin
+    path("", include("databaseManager.urls")),  # Include databaseManager app URLs
 ]
 
 urlpatterns += staticfiles_urlpatterns()
