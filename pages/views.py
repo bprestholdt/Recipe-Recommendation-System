@@ -57,16 +57,22 @@ def generate_recipe_chatGPT(ingredients):
         # Check if request was successful
         if response.status_code == 200:
             # Extract generated recipe from response
-            generated_recipe = response.json()['choices'][0]['text']
+            generated_recipe_text = response.json()['choices'][0]['text']
+
+            # Construct recipe dictionary
+            generated_recipe = {
+                'author': 'Generated Author',
+                'title': 'Generated Recipe',  # Default title if not provided by API
+                'description': generated_recipe_text,
+                'ingredients': ingredients,
+                'date_posted': 'Today'
+            }
+
+          
 
             # return generated recipe
-            return {
-            'author': 'Generated Author',
-            'title': 'Generated Recipe',
-            'description': generated_recipe
-            'ingredients': ingredients,
-            'date_posted': 'Today'
-        }
+            return generated_recipe
+       
         else:
             # If request failed, return error message
             return {
