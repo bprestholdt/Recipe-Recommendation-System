@@ -1,0 +1,16 @@
+-e "*.pyc\n__pycache__/" 
+
+# Ignore Python bytecode files
+*.pyc
+__pycache__/
+
+-e "*.pyc\n__pycache__/" 
+*.env
+.env
+.env.*
+
+venv/
+.venv/
+
+.vscode/
+.idea/
