@@ -1,1 +1,10 @@
 -e "*.pyc\n__pycache__/" 
+*.env
+.env
+.env.*
+
+venv/
+.venv/
+
+.vscode/
+.idea/
