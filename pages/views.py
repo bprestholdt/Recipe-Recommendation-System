@@ -4,6 +4,14 @@ from databaseManager.models import Recipe
 from databaseManager.forms import RecipeForm
 import requests
 import json
+from django.utils import timezone
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
+from django.contrib import messages
+from .forms import RegistrationForm
+from django.contrib.auth import logout
 
 #list of example recipes to be displayed at bottom of home page- could change/add more detail in future
 recipes = [
@@ -29,29 +37,28 @@ recipes = [
 
 # Create your views here.
 
-#function to generate a recipe using chatGPT
 def generate_recipe_chatGPT(ingredients):
-    # ChatGPT API endpoint
-    api_endpoint = 'https://api.openapi.com/v1/completions'
-
-    # Provide OpenAI API key
-    api_key = 'sk-proj-gMhE1JpO8HsUAB32TSCeT3BlbkFJ4kSrObVWHekv9TpdiAp8'
-
-    # Request headers
-    headers = {
-        'Content-Type': 'application/json',
-        'Authorization': f'Bearer {api_key}',
-    }
-
-    # Request data
-    data = {
-        'model': 'text-davinci-003', # check what model 
-        'prompt': f'Generate a recipe using the following ingredients: {ingredients}',
-        'max_tokens':100, # adjust
-    }
-
     try:
-        # make POST request to chatGPT API
+        # ChatGPT API endpoint
+        api_endpoint = 'https://api.openapi.com/v1/completions'
+
+        # Provide OpenAI API key
+        api_key = 'sk-proj-gMhE1JpO8HsUAB32TSCeT3BlbkFJ4kSrObVWHekv9TpdiAp8'
+
+        # Request headers
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {api_key}',
+        }
+
+        # Request data
+        data = {
+            'model': 'text-davinci-003', # check what model 
+            'prompt': f'Generate a recipe using the following ingredients: {ingredients}',
+            'max_tokens':100, # adjust
+        }
+
+        # Make POST request to ChatGPT API
         response = requests.post(api_endpoint, headers=headers, data=json.dumps(data))
 
         # Check if request was successful
@@ -68,21 +75,19 @@ def generate_recipe_chatGPT(ingredients):
                 'date_posted': 'Today'
             }
 
-          
-
-            # return generated recipe
+            # Return generated recipe
             return generated_recipe
-       
         else:
             # If request failed, return error message
             return {
-                'error': 'Failed to generate recipe. Please try again later.'
+                'error': f'Failed to generate recipe. API responded with status code {response.status_code}.'
             }
     except Exception as e:
         # If an exception occurs, return error message
         return {
-            'error': str(e)
+            'error': f'Failed to generate recipe. An exception occurred: {str(e)}'
         }
+
 
 #function to save recipe to user account in postgreSQL database
 def save_recipe(title, description, ingredients, author):
@@ -96,40 +101,75 @@ def save_recipe(title, description, ingredients, author):
     
     
 
+from django.contrib.auth.decorators import login_required
+
+@login_required(login_url='/login/')  # This decorator ensures that only logged-in users can access this view
 def home(request):
     if request.method == 'POST':
         # Handle submitted recipe
         form = RecipeForm(request.POST)
         if form.is_valid():
-            #generate recipe with gpt
-            # generate recipe w gpt function
-            gpt_generated_recipe = generate_recipe_chatGPT(form.cleaned_data['ingredients'])
+            # Generate recipe with GPT
+            generated_recipe = generate_recipe_chatGPT(form.cleaned_data['ingredients'])
 
-        # Create a new instance of the Recipe model with the generated recipe
-            recipe = Recipe(
-                title=gpt_generated_recipe['title'],
-                description=gpt_generated_recipe['description'],
-                ingredients=form.cleaned_data['ingredients'],
-                author=request.user
-            )
-        # Save the new recipe to the database (and tie to user account)
-            recipe.save()
+            # Check if the generated recipe is not empty
+            if generated_recipe:
+                # Print the generated recipe for debugging
+                print("Generated Recipe:", generated_recipe)
 
-            # Redirect to a success page or render a success message
-            return render(request, 'pages/success.html')
+                # Create a new instance of the Recipe model with the generated recipe
+                if request.user.is_authenticated:
+                    # If the user is logged in, set the author to the logged-in user
+                    recipe = Recipe(
+                        title="Generated Recipe",
+                        description=generated_recipe,
+                        ingredients=form.cleaned_data['ingredients'],
+                        author=request.user
+                    )
+                else:
+                    # If the user is not logged in, set the author to None
+                    recipe = Recipe(
+                        title="Generated Recipe",
+                        description=generated_recipe,
+                        ingredients=form.cleaned_data['ingredients'],
+                        author=None
+                    )
+                # Save the new recipe to the database
+                recipe.save()
+
+                # Redirect to a success page or render a success message
+                return render(request, 'pages/success.html',{'recipe': recipe})
+            else:
+                # If the generated recipe is empty, display an error message
+                error_message = 'Failed to generate recipe. Please try again later.'
+                print("Error Message:", error_message)  # Debugging print statement
+                return render(request, 'pages/error.html', {'error_message': error_message})
         
-        else:
-            form = RecipeForm()
-
-
-
-        context = {
-            'recipes': recipes,
-            'recipe': gpt_generated_recipe if request.method == 'POST' else None  # Only show generated recipe if ingredients are input
-        }
     else:
-        context = {
+        form = RecipeForm()
+        
+    context = {
+        'form': form,
         'recipes': recipes,
-        'recipe': None
     }
     return render(request, 'pages/home.html', context)
+
+def registration_view(request):
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')  # Redirect to login page after successful registration
+    else:
+        form = RegistrationForm()
+    return render(request, 'registration/registration.html', {'form': form})
+
+def login_page(request):
+    # Render the login page template
+    return render(request, 'pages/login.html')
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('home')  # Redirect to the home page after logout
+

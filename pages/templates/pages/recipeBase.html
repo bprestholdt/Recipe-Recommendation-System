@@ -6,6 +6,100 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" type="text/css" href="{% static 'pages/styles.css' %}">
+    <style>
+    /* General styles */
+    body {
+        font-family: 'Rockwell', serif;
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        color: #e0e0e0;
+        margin: 0;
+        padding: 0;
+        line-height: 1.6;
+        transition: background-color 0.3s;
+    }
+
+    /* Center content utility */
+    .center-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    h1, h2 {
+        text-align: center;
+        margin-top: 0;
+        color: #f0f0f0;
+        animation: fadeIn 2s ease-out;
+    }
+
+    /* Form styling */
+    form {
+        width: 100%;
+        max-width: 500px;
+        margin: 20px;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.8);
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .form-label {
+        font-size: 1.2rem;
+        color: #ffffff;
+    }
+
+    .form-control {
+        background-color: #333;
+        border: none;
+        border-bottom: 3px solid transparent;
+        border-radius: 5px;
+        padding: 12px;
+        font-size: 1rem;
+        color: #ffffff;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .form-control:focus {
+        border-bottom: 3px solid #646cff;
+        background-color: #222;
+        outline: none;
+    }
+
+    /* Button styling */
+    .btn-primary {
+        background-color: #646cff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s;
+        font-size: 1.2rem;
+    }
+
+    .btn-primary:hover {
+        background-color: #4a5bcd;
+        transform: translateY(-2px);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+    </style>
     {% if title %}
     <title>Django Recipes - {{title}}</title>
     {% else %}
@@ -21,7 +115,7 @@
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container">
-        <a class="navbar-brand" href="{% url 'RRS-home' %}">Recipe Recommendation System</a>
+        <a class="navbar-brand" href="{% url 'home' %}">Recipe Recommendation System</a>
         <button
           class="navbar-toggler"
           type="button"
@@ -39,19 +133,33 @@
               <a
                 class="nav-link"
                 aria-current="page"
-                href="{% url 'RRS-home' %}"
+                href="{% url 'home' %}"
                 >Browse User Recipes</a
               >
             </li>
             <li class="nav-item">
               <a
                 class="nav-link"
-                href="{% url 'RRS-home' %}"
+                href="{% url 'home' %}"
                 >My Generated Recipes</a
               >
             </li>
           </ul>
         </div>
+        <ul class="navbar-nav">
+          {% if user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link" href="#">Welcome, {{ user.username }}</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'login' %}">Login</a>
+            </li>
+          {% endif %}
+        </ul>
       </div>
     </nav>
     <div class="container mt-4 col-8">{% block content %} {% endblock %}</div>
