@@ -53,6 +53,7 @@
     <p><strong>Author:</strong> {{ recipe.author }}</p>
     <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
     <p><strong>Description:</strong> {{ recipe.description }}</p>
-    <p><strong>Date Posted:</strong> {{ recipe.date_posted }}</p>
+    <p><strong>Instructions:</strong> {{ recipe.instructions }}</p>
+    <p><strong>Date Posted:</strong> {{ recipe.date_created|date:"F j, Y" }}</p>
 </body>
 </html>
