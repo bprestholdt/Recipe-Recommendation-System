@@ -10,8 +10,10 @@ class Recipe(models.Model):
      description = models.TextField()
      author = models.ForeignKey(User, on_delete=models.CASCADE)
      ingredients = models.TextField(default = '')
+     instructions = models.TextField(default='')
      created_at = models.DateTimeField(auto_now_add=True)
      updated_at = models.DateTimeField(auto_now=True)
+     date_created = models.DateTimeField(default=timezone.now)
 
      def __str__(self):
           return self.title
