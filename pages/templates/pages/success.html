@@ -9,8 +9,8 @@
         /* General styles */
         body {
             font-family: 'Rockwell', serif;
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-            color: #e0e0e0;
+            background: linear-gradient(to right, #8a2387, #e94057, #f27121);
+            color: #ffffff;
             margin: 0;
             padding: 0;
             line-height: 1.6;
@@ -20,22 +20,46 @@
             justify-content: center;
             min-height: 100vh;
             text-align: center;
+            animation: fadeIn 1.5s ease-out;
         }
 
         h1, h2 {
-            color: #f0f0f0;
+            color: #ffffff;
             margin-top: 20px;
-            animation: fadeIn 2s ease-out;
+            animation: fadeInDown 1s ease-out;
         }
 
         p {
-            color: #ccc;
+            color: #e0e0e0;
             font-size: 1.1rem;
             margin: 10px 0;
+            animation: fadeInUp 1s ease-out;
         }
 
         /* Animations */
         @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
             from {
                 opacity: 0;
                 transform: translateY(20px);

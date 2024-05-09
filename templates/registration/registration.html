@@ -5,6 +5,127 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recipe Recommendation System - Registration</title>
+    <style>
+        body {
+            font-family: 'Rockwell', serif;
+            background: linear-gradient(to right, #8a2387, #e94057, #f27121);
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            animation: fadeIn 1.5s ease-out;
+        }
+
+        .registration-container {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            padding: 40px;
+            text-align: center;
+            width: 100%;
+            max-width: 450px;
+            backdrop-filter: blur(5px);
+            animation: zoomIn 0.8s ease-out;
+        }
+
+        h1 {
+            color: #ffffff;
+            margin-bottom: 20px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            background-color: #1f1f1f;
+            border: none;
+            border-bottom: 3px solid transparent;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            color: #ffffff;
+            transition: all 0.3s ease-in-out;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="email"]:focus {
+            border-bottom: 3px solid #e94057;
+            background-color: #121212;
+            outline: none;
+        }
+
+        input[type="submit"] {
+            width: 100%;
+            background-color: #e94057;
+            border: none;
+            padding: 12px 20px;
+            margin: 12px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        input[type="submit"]:hover {
+            background-color: #d7354d;
+            transform: translateY(-2px);
+        }
+
+        a {
+            color: #f27121;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease-in-out;
+        }
+
+        a:hover {
+            color: #ffffff;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+    </style>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
