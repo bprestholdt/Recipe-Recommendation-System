@@ -96,9 +96,18 @@ DATABASES = {
         'HOST': 'localhost',
 
         'PORT': '5432',
+        
+        'TEST': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'test_database',
+            'USER': 'test_user',
+            'PASSWORD': 'test_password',
+            'HOST': 'localhost',
+            'PORT': '5432',
 
     }
 
+}
 }
 
 
