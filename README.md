@@ -2,9 +2,7 @@
 
 An AI-powered recipe generation web app built with Django and the OpenAI API. Users register an account, enter ingredients they have on hand, and the app uses GPT-3.5 to generate a custom recipe that gets saved to their account history.
 
-## Live Demo
-
-**[your-app.up.railway.app](https://your-app.up.railway.app)** ← update after deploying
+# Deployed Site Link: https://web-production-fb7b2.up.railway.app/
 
 > First load may take a moment if the service has been idle.
 
