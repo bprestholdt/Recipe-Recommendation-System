@@ -1,16 +1,41 @@
--e "*.pyc\n__pycache__/" 
-
-# Ignore Python bytecode files
+# Python
 *.pyc
+*.pyo
 __pycache__/
+*.py[cod]
 
--e "*.pyc\n__pycache__/" 
-*.env
-.env
-.env.*
-
+# Virtual environment
 venv/
 .venv/
+env/
 
+# Environment variables - NEVER commit these
+.env
+.env.*
+*.env
+# Exception: the example template is safe to commit
+!.env.example
+
+# Django
+db.sqlite3
+staticfiles/
+media/
+
+# Sensitive backups
+*.backup
+*.bak
+
+# IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
