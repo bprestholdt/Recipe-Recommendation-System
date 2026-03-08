@@ -241,3 +241,15 @@ def logout_view(request):
     logout(request)
     return redirect('home')  # Redirect to the home page after logout
 
+
+@login_required(login_url='/login/')
+def browse_recipes(request):
+    recipes = Recipe.objects.all().order_by('-date_created')
+    return render(request, 'pages/browse_recipes.html', {'recipes': recipes})
+
+
+@login_required(login_url='/login/')
+def my_recipes(request):
+    recipes = Recipe.objects.filter(author=request.user).order_by('-date_created')
+    return render(request, 'pages/my_recipes.html', {'recipes': recipes})
+
