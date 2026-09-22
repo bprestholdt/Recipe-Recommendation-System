@@ -1,7 +1,6 @@
 from django.http import HttpResponse
 from databaseManager.models import Recipe
 from databaseManager.forms import RecipeForm
-import requests
 import json
 from django.conf import settings
 from django.utils import timezone
@@ -36,33 +35,31 @@ recipes = [
 ]
 
 # Create your views here.
-import openai
 import re
+from openai import OpenAI
+import openai
+
 def generate_recipe_chatGPT(ingredients):
     try: 
         # Provide OpenAI API key
-        openai.api_key = settings.OPENAI_API_KEY
+        client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
-        # Debug print statement to verify API key is correctly set
-        print("Using OpenAI API Key:", openai.api_key)
-
-        response = openai.ChatCompletion.create(
-            model = "gpt-3.5-turbo",
+        response = client.chat.completions.create(
+            #model is set by the OPENAI_MODEL environment variable so it can change without a code change
+            model = settings.OPENAI_MODEL,
             messages = [
                 {"role": "system", "content": "You are a helpful chef that generates creative recipes."},
                 {"role": "user", "content": f"Generate a recipe using the following ingredients: {ingredients}."
                                             f"Include a title, description, and detailed instructions."}
-            ],          
-            max_tokens = 500, 
+            ],
+            #caps cost per recipe; newer models count any internal reasoning toward this, so leave headroom
+            max_completion_tokens = 1500,
         )
-     # Debug print statement for the response
-        print("API Response:", response)
 
        # Extract the response message
-        if response and response.choices and response.choices[0].message:
+        if response and response.choices and response.choices[0].message and response.choices[0].message.content:
             # Extract and parse the content
-            content = response.choices[0].message['content']
-            print("Generated Recipe Content:", content)
+            content = response.choices[0].message.content
 
             # Parse the response to find title, description, and instructions
             title = "Generated Recipe"
@@ -101,7 +98,7 @@ def generate_recipe_chatGPT(ingredients):
                 "date_created": timezone.now()
             }
 
-    except openai.error.AuthenticationError as e:
+    except openai.AuthenticationError as e:
         print(f"Authentication Error: {e}")
         return {
             "title": "Authentication error",
@@ -110,7 +107,7 @@ def generate_recipe_chatGPT(ingredients):
             "date_created": timezone.now()
         }
 
-    except openai.error.RateLimitError as e:
+    except openai.RateLimitError as e:
         print(f"Rate Limit Error: {e}")
         return {
             "title": "Quota exceeded",
@@ -119,7 +116,7 @@ def generate_recipe_chatGPT(ingredients):
             "date_created": timezone.now()
         }
 
-    except openai.error.InvalidRequestError as e:
+    except openai.BadRequestError as e:
         print(f"Invalid Request Error: {e}")
         return {
             "title": "Invalid request error",
@@ -128,7 +125,7 @@ def generate_recipe_chatGPT(ingredients):
             "date_created": timezone.now()
         }
 
-    except openai.error.APIConnectionError as e:
+    except openai.APIConnectionError as e:
         print(f"API Connection Error: {e}")
         return {
             "title": "API connection error",
@@ -137,7 +134,7 @@ def generate_recipe_chatGPT(ingredients):
             "date_created": timezone.now()
         }
 
-    except openai.error.APIError as e:
+    except openai.APIError as e:
         print(f"API Error: {e}")
         return {
             "title": "API error",
@@ -156,8 +153,6 @@ def generate_recipe_chatGPT(ingredients):
         }
 
 
-
-
 #function to save recipe to user account in postgreSQL database
 def save_recipe(title, description, ingredients, author):
     recipe = Recipe(
@@ -172,7 +167,6 @@ def save_recipe(title, description, ingredients, author):
 
 from django.contrib.auth.decorators import login_required
 
-from .views import generate_recipe_chatGPT
 
 @login_required(login_url='/login/')  # This decorator ensures that only logged-in users can access this view
 def home(request):
@@ -187,8 +181,6 @@ def home(request):
 
             # Check if the generated recipe is not empty
             if generated_recipe and generated_recipe != "Error generating recipe.":
-                # Print for debugging
-                print("Generated Recipe:", generated_recipe)
 
                 # Create a new instance of the Recipe model with the generated recipe
                     # If the user is logged in, set the author to the logged-in user

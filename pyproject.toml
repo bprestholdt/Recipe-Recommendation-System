@@ -1,0 +1,22 @@
+# Vercel reads this file to install dependencies and run the build step.
+# Keep the dependency list in sync with requirements.txt (used for local setup with pip).
+[project]
+name = "recipe-rec-system"
+version = "1.0.0"
+requires-python = ">=3.12"
+dependencies = [
+    "Django>=5.2,<5.3",
+    "python-dotenv>=1.0.1",
+    "openai>=1.40,<3",
+    "whitenoise>=6.6.0",
+    "psycopg2-binary>=2.9.10",
+    "dj-database-url>=2.1.0",
+]
+
+[tool.vercel]
+entrypoint = "RecipeRecSystem.wsgi:application"
+
+# runs on every deploy after dependencies install: applies any new database migrations
+# (Vercel runs collectstatic on its own)
+[tool.vercel.scripts]
+build = "python manage.py migrate --noinput"

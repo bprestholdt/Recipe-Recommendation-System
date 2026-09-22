@@ -11,6 +11,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+# which OpenAI model generates recipes; override with the OPENAI_MODEL environment variable
+OPENAI_MODEL = os.getenv('OPENAI_MODEL', 'gpt-6-luna')
 
 # Build paths inside the project
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,12 +23,22 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-CHANGE-THIS-IN-PRODUCTION'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+# comma-separated; a leading dot allows every subdomain (".vercel.app" covers the main URL and preview URLs)
+ALLOWED_HOSTS = [h.strip() for h in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()]
 
+# extra HTTPS origins allowed to submit forms, built from exact hosts in ALLOWED_HOSTS
+# (forms from the site's own address are already accepted once Django knows the request is HTTPS, see below)
+# wildcard hosts like ".vercel.app" are skipped on purpose: trusting every vercel.app site would weaken CSRF protection
 CSRF_TRUSTED_ORIGINS = [
     f'https://{host}' for host in ALLOWED_HOSTS
-    if host not in ('localhost', '127.0.0.1', '')
+    if host not in ('localhost', '127.0.0.1') and not host.startswith('.')
 ]
+
+# the host (Vercel) terminates HTTPS and tells Django via this header
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# only send login/session cookies over HTTPS in production
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 
 # Application definition
 INSTALLED_APPS = [
@@ -72,11 +84,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'RecipeRecSystem.wsgi.application'
 
 # Database
-# Uses DATABASE_URL env var on Railway (PostgreSQL), falls back to SQLite locally
+# Uses the DATABASE_URL env var in production (PostgreSQL on Neon), falls back to SQLite locally
+# short connection reuse with health checks, since the serverless database sleeps when idle
 DATABASES = {
     'default': dj_database_url.config(
         default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
-        conn_max_age=600,
+        conn_max_age=60,
+        conn_health_checks=True,
     )
 }
 
@@ -97,7 +111,10 @@ USE_TZ = True
 # Static files
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage'},
+}
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = 'home'
