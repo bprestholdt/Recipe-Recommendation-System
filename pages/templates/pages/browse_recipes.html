@@ -10,7 +10,7 @@
         <p style="color:#b0b0b0; margin:4px 0;">By {{ recipe.author }} &mdash; {{ recipe.date_created|date:"F j, Y" }}</p>
         <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
         <p><strong>Description:</strong> {{ recipe.description }}</p>
-        <p><strong>Instructions:</strong> {{ recipe.instructions }}</p>
+        <p><strong>Instructions:</strong><br>{{ recipe.instructions|linebreaksbr }}</p>
     </div>
     {% endfor %}
 {% else %}
