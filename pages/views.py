@@ -52,8 +52,9 @@ def generate_recipe_chatGPT(ingredients):
                 {"role": "user", "content": f"Generate a recipe using the following ingredients: {ingredients}."
                                             f"Include a title, description, and detailed instructions."}
             ],
-            #caps cost per recipe; newer models count any internal reasoning toward this, so leave headroom
-            max_completion_tokens = 1500,
+            #caps cost per recipe; newer models spend part of this on internal reasoning before writing,
+            #so it needs plenty of headroom or the reply comes back empty
+            max_completion_tokens = 4000,
         )
 
        # Extract the response message
@@ -90,8 +91,13 @@ def generate_recipe_chatGPT(ingredients):
             }
 
         else:
-            print("Error: No valid response message found")
+            #log why the reply was empty (e.g. finish_reason "length" = ran out of tokens, or a refusal)
+            choice = response.choices[0] if response and response.choices else None
+            print("Error: No recipe text in response. finish_reason:",
+                  getattr(choice, "finish_reason", None),
+                  "refusal:", getattr(getattr(choice, "message", None), "refusal", None))
             return {
+                "error": True,
                 "title": "Error generating recipe.",
                 "description": "Could not generate a recipe with the given ingredients.",
                 "instructions": "Could not generate a recipe with the given ingredients.",
@@ -101,6 +107,7 @@ def generate_recipe_chatGPT(ingredients):
     except openai.AuthenticationError as e:
         print(f"Authentication Error: {e}")
         return {
+            "error": True,
             "title": "Authentication error",
             "description": "Could not authenticate with the OpenAI API.",
             "instructions": "Please check your OpenAI API key.",
@@ -110,6 +117,7 @@ def generate_recipe_chatGPT(ingredients):
     except openai.RateLimitError as e:
         print(f"Rate Limit Error: {e}")
         return {
+            "error": True,
             "title": "Quota exceeded",
             "description": "The API quota limit has been reached.",
             "instructions": "Please check your OpenAI plan and billing details.",
@@ -119,6 +127,7 @@ def generate_recipe_chatGPT(ingredients):
     except openai.BadRequestError as e:
         print(f"Invalid Request Error: {e}")
         return {
+            "error": True,
             "title": "Invalid request error",
             "description": "Invalid request sent to the OpenAI API.",
             "instructions": "Please check the request data and try again.",
@@ -128,6 +137,7 @@ def generate_recipe_chatGPT(ingredients):
     except openai.APIConnectionError as e:
         print(f"API Connection Error: {e}")
         return {
+            "error": True,
             "title": "API connection error",
             "description": "Could not connect to the OpenAI API.",
             "instructions": "Please check your network connection and try again.",
@@ -137,6 +147,7 @@ def generate_recipe_chatGPT(ingredients):
     except openai.APIError as e:
         print(f"API Error: {e}")
         return {
+            "error": True,
             "title": "API error",
             "description": "An internal error occurred while generating the recipe.",
             "instructions": "Please try again later.",
@@ -146,6 +157,7 @@ def generate_recipe_chatGPT(ingredients):
     except Exception as e:
         print(f"Error generating recipe: {e}")
         return {
+            "error": True,
             "title": "Error generating recipe.",
             "description": "An unexpected error occurred.",
             "instructions": "Please try again later.",
@@ -179,8 +191,8 @@ def home(request):
             print("Ingredients for Recipe Generation:", ingredients)
             generated_recipe = generate_recipe_chatGPT(ingredients)
 
-            # Check if the generated recipe is not empty
-            if generated_recipe and generated_recipe != "Error generating recipe.":
+            # Check that generation worked (error results are marked with "error": True and never saved)
+            if generated_recipe and not generated_recipe.get("error"):
 
                 # Create a new instance of the Recipe model with the generated recipe
                     # If the user is logged in, set the author to the logged-in user
@@ -198,8 +210,10 @@ def home(request):
                 # Redirect to a success page or render a success message
                 return render(request, 'pages/success.html',{'recipe': recipe})
             else:
-                # If the generated recipe is empty, display an error message
+                # If generation failed, show the error page with the reason instead of saving it as a recipe
                 error_message = 'Failed to generate recipe. Please try again later.'
+                if generated_recipe:
+                    error_message = f"{generated_recipe['title']}: {generated_recipe['description']}"
                 print("Error Message:", error_message)  # Debugging print statement
                 return render(request, 'pages/error.html', {'error_message': error_message})
         
